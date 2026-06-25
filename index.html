@@ -44,7 +44,7 @@
   }
   #loveText {
     position: absolute;
-    top: 40%;
+    top: 36%;
     left: 50%;
     transform: translate(-50%, -50%);
     font-family: 'Parisienne', cursive;
@@ -60,10 +60,13 @@
 
   #messageText {
     position: absolute;
-    top: 50%;
+    top: 40%;
     left: 50%;
     transform: translateX(-50%);
-    width: min(700px, 70vw);
+
+    width: 85vw;
+    max-width: 810px;
+
     text-align: center;
 
     font-family: Georgia, "Times New Roman", serif;
@@ -77,7 +80,7 @@
 
     pointer-events: none;
     z-index: 20;
-  }
+}
 
   #polaroidLayer {
     position: absolute;
@@ -115,7 +118,15 @@
 <div id="ui">Click anywhere to plant a flower...</div>
 <div id="loveText">I Love You</div>
 <div id="messageText">
-  
+My Dearest Pallavi,
+<br>There isn’t a single day when I don’t feel blessed to call you my beloved girlfriend.
+No matter what happens, my mind always finds its way back to you.
+You are the most precious part of my life and every piece of my heart belongs to you.
+For more than two years, you have been my rock, my safe place, and my greatest source of strength.<br>At this point, imagining a life without you feels impossible. We have been through so much together, whether it was the moments of joy or feelings of sadness; <br>through it all, you never left my side.
+<br>I know I haven’t always been the best boyfriend I could have been and there are times when I wish I had done better. But one thing I can promise is that I will always keep trying, every single day, to become a better partner for you and to keep that beautiful smile on your face.
+Please accept this gift as a small token of the immense love and gratitude I carry in my heart for you. It could never fully express how much you mean to me, but I hope it reminds you of how deeply and endlessly you are loved.
+<br>With all my love,
+<br>Your Amorzinho
 </div>
 <div id="polaroidLayer"></div>
 <canvas id="bgCanvas"></canvas>
@@ -167,10 +178,10 @@ function createPolaroids() {
   const topSpacing = (lastCenter - firstCenter) / (topPhotos - 1);
 
   const leftCol1X = 20;
-  const leftCol2X = 270;
+  const leftCol2X = 260;
 
   const rightCol1X = window.innerWidth - 200;
-  const rightCol2X = window.innerWidth - 520;
+  const rightCol2X = window.innerWidth - 510;
 
   const verticalSpacing = 290;
 
