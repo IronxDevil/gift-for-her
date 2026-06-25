@@ -17,9 +17,19 @@
   }
   canvas {
     position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
   }
+
+#bgCanvas {
+    z-index: 5;
+  }
+
+#c {
+    z-index: 15;
+}
   #ui {
     position: absolute;
     top: 20px;
@@ -34,7 +44,7 @@
   }
   #loveText {
     position: absolute;
-    top: 15%;
+    top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
     font-family: 'Parisienne', cursive;
@@ -45,7 +55,55 @@
         0 0 20px rgba(255,192,203,0.3);
     /* font-style: italic; */
     pointer-events: none;
+    z-index: 20;
+  }
+
+  #messageText {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(700px, 70vw);
+    text-align: center;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 20px;
+    line-height: 1.8;
+
+    color: rgba(255,255,255,0.82);
+
+    text-shadow:
+      0 0 8px rgba(255,255,255,0.15);
+
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  #polaroidLayer {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
     z-index: 10;
+  }
+
+  .polaroid {
+    position: absolute;
+    width: 220px;
+    padding: 12px 12px 40px 12px;
+    background: white;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    border-radius: 2px;
+    opacity: 0.9;
+    filter: blur(1.5px);
+    transform-origin: center center;
+  }
+
+  .polaroid img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    display: block;
   }
   @keyframes fadeOut {
     to { opacity: 0; }
@@ -55,20 +113,139 @@
 <body>
 
 <div id="ui">Click anywhere to plant a flower...</div>
-<div id="loveText">I love you my sunflower</div>
+<div id="loveText">I Love You</div>
+<div id="messageText">
+  
+</div>
+<div id="polaroidLayer"></div>
+<canvas id="bgCanvas"></canvas>
 <canvas id="c"></canvas>
 
 <script>
+const bgCanvas = document.getElementById('bgCanvas');
+const bgCtx = bgCanvas.getContext('2d');
+
 const canvas = document.getElementById('c');
-const ctx    = canvas.getContext('2d');
+const ctx = canvas.getContext('2d');
 let W, H, CX, BASE, SC;
 
 const flowers = [];
 const START = Date.now();
 
+
+const photos = [
+  'images/us1.jpeg',
+  'images/us2.jpeg',
+  'images/us3.jpeg',
+  'images/us4.jpeg',
+  'images/us5.jpeg',
+  'images/us6.jpeg',
+  'images/us7.jpeg',
+  'images/us8.jpeg',
+  'images/us9.jpeg',
+  'images/us10.jpeg',
+  'images/us11.jpeg',
+  'images/us12.jpeg',
+  'images/us13.jpeg',
+  'images/us14.jpeg',
+  'images/us15.jpeg'
+];
+const polaroidLayer = document.getElementById('polaroidLayer');
+
+
+function createPolaroids() {
+  polaroidLayer.innerHTML = '';
+
+  const topPhotos = 5;
+  const remaining = photos.length - topPhotos;
+  const leftPhotos = Math.ceil(remaining / 2);
+  const rightPhotos = remaining - leftPhotos;
+
+  const outerMargin = 255; // distance from left/right edges
+  const firstCenter = outerMargin;
+  const lastCenter = window.innerWidth - outerMargin;
+  const topSpacing = (lastCenter - firstCenter) / (topPhotos - 1);
+
+  const leftCol1X = 20;
+  const leftCol2X = 270;
+
+  const rightCol1X = window.innerWidth - 200;
+  const rightCol2X = window.innerWidth - 520;
+
+  const verticalSpacing = 290;
+
+  photos.forEach((photo, index) => {
+    const card = document.createElement('div');
+    card.className = 'polaroid';
+
+    let size;
+    if (index < topPhotos) {
+      size = 260 + Math.random() * 25; // Top row
+    }
+    else {
+      size = 220 + Math.random() * 20; // Left & right columns
+    }
+
+    let x, y;
+
+    if (index < topPhotos) {
+      x = firstCenter + index * topSpacing - size / 2;
+      y = 15 + Math.random() * 15;
+    }
+    else if (index < topPhotos + leftPhotos) {
+      const i = index - topPhotos;
+
+      const column = i % 2;
+      const row = Math.floor(i / 2);
+
+      x = column === 0 ? leftCol1X : leftCol2X;
+      y = 250 + row * verticalSpacing + column * 210;
+    }
+    else {
+      const i = index - topPhotos - leftPhotos;
+
+      const column = i % 2;
+      const row = Math.floor(i / 2);
+
+      x = column === 0 ? rightCol1X : rightCol2X;
+      y = 250 + row * verticalSpacing + column * 210;
+    }
+
+    x += (Math.random() - 0.5) * 12;
+    y += (Math.random() - 0.5) * 12;
+
+    x = Math.max(10, Math.min(x, window.innerWidth - size - 10));
+    y = Math.max(10, Math.min(y, window.innerHeight - size - 10));
+
+    card.style.width = `${size}px`;
+    card.style.left = `${x}px`;
+    card.style.top = `${y}px`;
+    card.style.transform = `rotate(${-15 + Math.random() * 30}deg)`;
+    if (index < topPhotos) {
+      card.style.zIndex = 1 + Math.floor(Math.random() * 3); // Top row: 1-3
+    } else {
+      card.style.zIndex = 10 + Math.floor(Math.random() * 5); // Side columns: 10-14
+    }
+
+    const img = document.createElement('img');
+    img.src = photo;
+
+    card.appendChild(img);
+    polaroidLayer.appendChild(card);
+  });
+}
+
+createPolaroids();
+
 function resize() {
-  W    = canvas.width  = window.innerWidth;
-  H    = canvas.height = window.innerHeight;
+  W = window.innerWidth;
+  H = window.innerHeight;
+
+  canvas.width = W;
+  canvas.height = H;
+
+  bgCanvas.width = W;
+  bgCanvas.height = H;
   CX   = W / 2;
   BASE = H * 0.95; 
   SC   = Math.min(W, H) / 700;
@@ -114,40 +291,40 @@ function resetSp(s) {
 }
 
 function drawEnvironment() {
-  const bg = ctx.createRadialGradient(CX, H*0.5, 10, CX, H*0.35, H*0.85);
+  const bg = bgCtx.createRadialGradient(CX, H*0.5, 10, CX, H*0.35, H*0.85);
   bg.addColorStop(0, '#221118');
   bg.addColorStop(0.4, '#0e0508');
   bg.addColorStop(0.8, '#040103');
   bg.addColorStop(1, '#000000');
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, W, H);
+  bgCtx.fillStyle = bg;
+  bgCtx.fillRect(0, 0, W, H);
   
-  const pool = ctx.createRadialGradient(CX, BASE, 10, CX, BASE-20, W);
+  const pool = bgCtx.createRadialGradient(CX, BASE, 10, CX, BASE-20, W);
   pool.addColorStop(0, 'rgba(40, 20, 10, 0.4)');
   pool.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = pool;
-  ctx.fillRect(0, 0, W, H);
+  bgCtx.fillStyle = pool;
+  bgCtx.fillRect(0, 0, W, H);
 
   STARS.forEach(s => {
     s.phase += s.speed;
     const a = 0.15 + 0.48 * Math.abs(Math.sin(s.phase));
-    ctx.beginPath();
-    ctx.arc(s.x*W, s.y*H, s.r, 0, Math.PI*2);
-    ctx.fillStyle = s.gold ? `rgba(255,215,120,${a})` : `rgba(255,230,230,${a})`;
-    ctx.fill();
+    bgCtx.beginPath();
+    bgCtx.arc(s.x*W, s.y*H, s.r, 0, Math.PI*2);
+    bgCtx.fillStyle = s.gold ? `rgba(255,215,120,${a})` : `rgba(255,230,230,${a})`;
+    bgCtx.fill();
   });
 
   SPARKS.forEach(s => {
     s.life += 0.005;
     if (s.life > s.max) resetSp(s);
     const a = Math.sin((s.life/s.max)*Math.PI) * 0.8;
-    ctx.beginPath();
-    ctx.arc(s.x + Math.sin(s.life*4)*5, s.y + s.vy*s.life*55, s.sz, 0, Math.PI*2);
-    ctx.fillStyle = `hsla(${s.hue},100%,82%,${a})`;
-    ctx.shadowColor = ctx.fillStyle;
-    ctx.shadowBlur = 8;
-    ctx.fill();
-    ctx.shadowBlur = 0;
+    bgCtx.beginPath();
+    bgCtx.arc(s.x + Math.sin(s.life*4)*5, s.y + s.vy*s.life*55, s.sz, 0, Math.PI*2);
+    bgCtx.fillStyle = `hsla(${s.hue},100%,82%,${a})`;
+    bgCtx.shadowColor = bgCtx.fillStyle;
+    bgCtx.shadowBlur = 8;
+    bgCtx.fill();
+    bgCtx.shadowBlur = 0;
   });
 }
 
@@ -422,7 +599,6 @@ window.addEventListener('click', (e) => {
 
 function draw() {
   ctx.clearRect(0, 0, W, H);
-  drawEnvironment();
 
   const now = Date.now();
   const t = now - START;
@@ -468,7 +644,12 @@ function draw() {
 
   requestAnimationFrame(draw);
 }
-
+function drawBackground() {
+  bgCtx.clearRect(0, 0, W, H);
+  drawEnvironment();
+  requestAnimationFrame(drawBackground);
+}
+drawBackground();
 draw();
 </script>
 </body>
