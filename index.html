@@ -11,6 +11,7 @@
     width: 100vw;
     height: 100vh;
     overflow: hidden;
+    position: relative;
     background: radial-gradient(circle at center, #1a0205 0%, #060002 60%, #010001 100%);
     font-family: 'Georgia', 'Times New Roman', serif;
     cursor: pointer;
@@ -21,6 +22,7 @@
     left: 0;
     width: 100%;
     height: 100%;
+    display: block;
   }
 
 #bgCanvas {
@@ -43,44 +45,39 @@
     animation-delay: 3s;
   }
   #loveText {
-    position: absolute;
-    top: 36%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-family: 'Parisienne', cursive;
-    font-size: 72px;
-    color: rgba(255,255,255,0.95);
-    text-shadow:
-        0 0 10px rgba(255,255,255,0.4),
-        0 0 20px rgba(255,192,203,0.3);
-    /* font-style: italic; */
-    pointer-events: none;
-    z-index: 20;
+      font-family: 'Parisienne', cursive;
+      font-size: clamp(52px, 6vw, 72px);
+      color: rgba(255,255,255,0.95);
+      text-shadow:
+          0 0 10px rgba(255,255,255,0.4),
+          0 0 20px rgba(255,192,203,0.3);
+      pointer-events: none;
   }
 
   #messageText {
-    position: absolute;
-    top: 40%;
-    left: 50%;
-    transform: translateX(-50%);
+      width: min(50vw, 680px);
+      text-align: center;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(16px, 1.1vw, 20px);
+      line-height: 1.7;
+      color: rgba(255,255,255,0.82);
+      text-shadow: 0 0 8px rgba(255,255,255,0.15);
+      pointer-events: none;
+  }
 
-    width: 85vw;
-    max-width: 810px;
-
-    text-align: center;
-
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 20px;
-    line-height: 1.8;
-
-    color: rgba(255,255,255,0.82);
-
-    text-shadow:
-      0 0 8px rgba(255,255,255,0.15);
-
-    pointer-events: none;
-    z-index: 20;
-}
+  #centerContent {
+      position: absolute;
+      left: 50%;
+      top: 65%;
+      transform: translate(-50%, -50%);
+      width: min(45vw, 580px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      z-index: 20;
+      pointer-events: none;
+  }
 
   #polaroidLayer {
     position: absolute;
@@ -88,6 +85,8 @@
     overflow: hidden;
     pointer-events: none;
     z-index: 10;
+    width: 100%;
+    height: 100%;
   }
 
   .polaroid {
@@ -116,6 +115,7 @@
 <body>
 
 <div id="ui">Click anywhere to plant a flower...</div>
+<div id="centerContent">
 <div id="loveText">I Love You</div>
 <div id="messageText">
 My Dearest Pallavi,
@@ -127,6 +127,7 @@ For more than two years, you have been my rock, my safe place, and my greatest s
 Please accept this gift as a small token of the immense love and gratitude I carry in my heart for you. It could never fully express how much you mean to me, but I hope it reminds you of how deeply and endlessly you are loved.
 <br>With all my love,
 <br>Your Amorzinho
+</div>
 </div>
 <div id="polaroidLayer"></div>
 <canvas id="bgCanvas"></canvas>
@@ -172,29 +173,46 @@ function createPolaroids() {
   const leftPhotos = Math.ceil(remaining / 2);
   const rightPhotos = remaining - leftPhotos;
 
-  const outerMargin = 255; // distance from left/right edges
+  const viewportWidth = window.innerWidth;
+
+  const SAFE_ZONE = {
+    left: viewportWidth * 0.28,
+    right: viewportWidth * 0.72,
+    top: window.innerHeight * 0.20,
+    bottom: window.innerHeight * 0.88
+  };
+
+  const outerMargin = viewportWidth * 0.12;
   const firstCenter = outerMargin;
-  const lastCenter = window.innerWidth - outerMargin;
+  const lastCenter = viewportWidth - outerMargin;
   const topSpacing = (lastCenter - firstCenter) / (topPhotos - 1);
 
-  const leftCol1X = 20;
-  const leftCol2X = 250;
+  const sidePhotoWidth = Math.min(200, viewportWidth * 0.12);
 
-  const rightCol1X = window.innerWidth - 200;
-  const rightCol2X = window.innerWidth - 500;
+  // Responsive side columns based on photo width
+  const leftCol1X = viewportWidth * 0.02;
+  const leftCol2X = leftCol1X + sidePhotoWidth * 2.1;
 
-  const verticalSpacing = 290;
+  const rightCol1X = viewportWidth * 0.98 - sidePhotoWidth;
+  const rightCol2X = rightCol1X - sidePhotoWidth * 2.1;
+
+  // Responsive vertical positioning
+  const startY = window.innerHeight * 0.24;
+  const verticalSpacing = window.innerHeight * 0.30;
+  const columnOffset = window.innerHeight * 0.18;
 
   photos.forEach((photo, index) => {
     const card = document.createElement('div');
     card.className = 'polaroid';
 
+    const topBaseSize = Math.min(240, viewportWidth * 0.14);
+    const sideBaseSize = Math.min(200, viewportWidth * 0.12);
     let size;
     if (index < topPhotos) {
-      size = 260 + Math.random() * 25; // Top row
+      size = topBaseSize + Math.random() * 20;
     }
     else {
-      size = 220 + Math.random() * 20; // Left & right columns
+      size = sideBaseSize + Math.random() * 15;
     }
 
     let x, y;
@@ -210,7 +228,7 @@ function createPolaroids() {
       const row = Math.floor(i / 2);
 
       x = column === 0 ? leftCol1X : leftCol2X;
-      y = 250 + row * verticalSpacing + column * 210;
+      y = startY + row * verticalSpacing + column * columnOffset;
     }
     else {
       const i = index - topPhotos - leftPhotos;
@@ -219,19 +237,35 @@ function createPolaroids() {
       const row = Math.floor(i / 2);
 
       x = column === 0 ? rightCol1X : rightCol2X;
-      y = 250 + row * verticalSpacing + column * 210;
+      y = startY + row * verticalSpacing + column * columnOffset;
     }
 
-    x += (Math.random() - 0.5) * 12;
-    y += (Math.random() - 0.5) * 12;
+    x += (Math.random() - 0.5) * 1;
+    y += (Math.random() - 0.5) * 1;
 
     x = Math.max(10, Math.min(x, window.innerWidth - size - 10));
     y = Math.max(10, Math.min(y, window.innerHeight - size - 10));
 
+    if (
+      index >= topPhotos &&
+      x < SAFE_ZONE.right &&
+      x + size > SAFE_ZONE.left &&
+      y < SAFE_ZONE.bottom &&
+      y + size > SAFE_ZONE.top
+    )
+    {
+      if (x < viewportWidth / 2) {
+        x = Math.max(10, SAFE_ZONE.left - size - 20);
+      } else {
+        x = Math.min(window.innerWidth - size - 10, SAFE_ZONE.right + 20);
+      }
+    }
+
     card.style.width = `${size}px`;
     card.style.left = `${x}px`;
     card.style.top = `${y}px`;
-    card.style.transform = `rotate(${-15 + Math.random() * 30}deg)`;
+    const rotations = [-12, 8, -7, 10, -5, 6, -9, 11, -4, 7, -8, 5, -6, 9, -10];
+    card.style.transform = `rotate(${rotations[index % rotations.length]}deg)`;
     if (index < topPhotos) {
       card.style.zIndex = 1 + Math.floor(Math.random() * 3); // Top row: 1-3
     } else {
@@ -263,7 +297,10 @@ function resize() {
   if (W < 600) SC = W / 350;
 }
 resize();
-window.addEventListener('resize', resize);
+window.addEventListener('resize', () => {
+  resize();
+  createPolaroids();
+});
 
 /* ── HELPERS ─────────────────────────────── */
 const clamp   = (v,a,b) => Math.max(a, Math.min(b, v));
