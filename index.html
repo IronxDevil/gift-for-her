@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>An Infinite Garden for Her 🌸</title>
+<link href="https://fonts.googleapis.com/css2?family=Parisienne&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -31,6 +32,21 @@
     animation: fadeOut 4s forwards;
     animation-delay: 3s;
   }
+  #loveText {
+    position: absolute;
+    top: 15%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Parisienne', cursive;
+    font-size: 72px;
+    color: rgba(255,255,255,0.95);
+    text-shadow:
+        0 0 10px rgba(255,255,255,0.4),
+        0 0 20px rgba(255,192,203,0.3);
+    /* font-style: italic; */
+    pointer-events: none;
+    z-index: 10;
+  }
   @keyframes fadeOut {
     to { opacity: 0; }
   }
@@ -39,6 +55,7 @@
 <body>
 
 <div id="ui">Click anywhere to plant a flower...</div>
+<div id="loveText">I love you my sunflower</div>
 <canvas id="c"></canvas>
 
 <script>
