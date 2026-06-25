@@ -80,26 +80,52 @@
   }
 
   #polaroidLayer {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    pointer-events: none;
-    z-index: 10;
-    width: 100%;
-    height: 100%;
-  }
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+
+  animation: frameBreath 5s ease-in-out infinite;
+}
 
   .polaroid {
-    position: absolute;
-    width: 220px;
-    padding: 12px 12px 40px 12px;
-    background: white;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-    border-radius: 2px;
-    opacity: 0.9;
-    filter: blur(1px);
-    transform-origin: center center;
-  }
+  position: absolute;
+  width: 220px;
+  padding: 12px 12px 40px 12px;
+  background: white;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  border-radius: 2px;
+  opacity: 0.9;
+  filter: blur(1px);
+  transform-origin: center center;
+
+  animation: photoBreath 3s ease-in-out infinite;
+  will-change: transform;
+}
+
+.polaroid::before {
+  content: '';
+  position: absolute;
+  inset: -30px;
+
+  z-index: -1;
+  pointer-events: none;
+
+  background: radial-gradient(
+    circle,
+    rgba(255,255,255,0.65) 0%,
+    rgba(255, 200, 200, 0.35) 40%,
+    transparent 80%
+  );
+
+  filter: blur(28px);
+
+  animation: glowPulse 3s ease-in-out infinite;
+  animation-delay: var(--delay);
+}
 
   .polaroid img {
     width: 100%;
@@ -107,6 +133,38 @@
     object-fit: cover;
     display: block;
   }
+
+  @keyframes photoBreath {
+  0%, 100% {
+    transform:
+      rotate(var(--rotation))
+      scale(1);
+  }
+  50% {
+    transform:
+      rotate(var(--rotation))
+      scale(1.04);
+  }
+}
+
+@keyframes frameBreath {
+  0%,100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes glowPulse {
+  0%,100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
   @keyframes fadeOut {
     to { opacity: 0; }
   }
@@ -265,7 +323,15 @@ function createPolaroids() {
     card.style.left = `${x}px`;
     card.style.top = `${y}px`;
     const rotations = [-12, 8, -7, 10, -5, 6, -9, 11, -4, 7, -8, 5, -6, 9, -10];
-    card.style.transform = `rotate(${rotations[index % rotations.length]}deg)`;
+    const rotation = rotations[index % rotations.length];
+
+    card.style.setProperty('--rotation', `${rotation}deg`);
+    card.style.transform = `rotate(${rotation}deg)`;
+    const delay = Math.random() * 8;
+
+    card.style.animationDelay = `${delay}s`;
+    card.style.setProperty('--delay', `${delay}s`);
+
     if (index < topPhotos) {
       card.style.zIndex = 1 + Math.floor(Math.random() * 3); // Top row: 1-3
     } else {
@@ -333,8 +399,8 @@ const SPARKS = Array.from({length: 40}, () => { const s={}; resetSp(s); s.life=M
 function resetSp(s) {
   s.x    = Math.random() * W;
   s.y    = BASE - Math.random() * (H * 0.8);
-  s.vy   = -0.2 - Math.random()*0.5;
-  s.life = 0; s.max = 0.6 + Math.random()*0.5; s.sz = 1.2 + Math.random()*2.0;
+  s.vy   = -0.4 - Math.random()*0.8;
+  s.life = 0; s.max = 0.6 + Math.random()*0.5; s.sz = 2.5 + Math.random() * 3.5;
   s.hue  = Math.random()*360; 
 }
 
@@ -367,10 +433,10 @@ function drawEnvironment() {
     if (s.life > s.max) resetSp(s);
     const a = Math.sin((s.life/s.max)*Math.PI) * 0.8;
     bgCtx.beginPath();
-    bgCtx.arc(s.x + Math.sin(s.life*4)*5, s.y + s.vy*s.life*55, s.sz, 0, Math.PI*2);
+    bgCtx.arc(s.x + Math.sin(s.life * 5) * 10, s.y + s.vy*s.life*55, s.sz, 0, Math.PI*2);
     bgCtx.fillStyle = `hsla(${s.hue},100%,82%,${a})`;
     bgCtx.shadowColor = bgCtx.fillStyle;
-    bgCtx.shadowBlur = 8;
+    bgCtx.shadowBlur = 18;
     bgCtx.fill();
     bgCtx.shadowBlur = 0;
   });
